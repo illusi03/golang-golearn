@@ -64,7 +64,9 @@ func main() {
 	addr := fmt.Sprintf("%s:%s", host, strconv.Itoa(port))
 	log.Printf("Server starting on %s", addr)
 
-	if err := app.Listen(addr); err != nil {
+	if err := app.Listen(addr, fiber.ListenConfig{
+		EnablePrefork: true,
+	}); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 
