@@ -14,7 +14,7 @@ import (
 
 func main() {
 	app := fiber.New(fiber.Config{
-		AppName:      "User Management API",
+		AppName:      "API",
 		ServerHeader: "Fiber",
 		ErrorHandler: customErrorHandler,
 	})
@@ -23,7 +23,7 @@ func main() {
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"success": true,
-			"message": "User Management API is running",
+			"message": "API is running",
 			"version": "1.0.0",
 		})
 	})
