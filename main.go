@@ -45,6 +45,7 @@ func main() {
 	products := v1.Group("/products")
 	products.Post("/", productHandler.Create)
 	products.Get("/", productHandler.GetAll)
+	products.Get("/:id", productHandler.GetDetail)
 	products.Put("/:id", productHandler.Update)
 	products.Delete("/:id", productHandler.Delete)
 

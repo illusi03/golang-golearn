@@ -126,3 +126,36 @@ func (h *ProductHandler) GetAll(c fiber.Ctx) error {
 		"data":    ProductDatas,
 	})
 }
+
+func (h *ProductHandler) GetDetail(c fiber.Ctx) error {
+	idStr := c.Params("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"success": false,
+			"message": "Error id product",
+			"error":   nil,
+		})
+	}
+
+	var productModel *ProductModel
+	for _, v := range ProductDatas {
+		if v.ID == id {
+			productModel = v
+		}
+	}
+
+	if productModel == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Product not found",
+			"error":   productModel,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "Data fetched successfully",
+		"data":    productModel,
+	})
+}
