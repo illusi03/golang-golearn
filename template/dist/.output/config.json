@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "framework": {
+    "version": "0.67.0"
+  },
+  "routes": [
+    {
+      "src": "/doc-api",
+      "dest": "/doc-api/product",
+      "status": 301,
+      "headers": {
+        "Location": "/doc-api/product"
+      }
+    },
+    {
+      "src": "/",
+      "dest": "/introduction",
+      "status": 301,
+      "headers": {
+        "Location": "/introduction"
+      }
+    }
+  ]
+}
