@@ -1,0 +1,359 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GoLearn API",
+    "version": "1.0.0",
+    "description": "Dokumentasi API untuk aplikasi GoLearn dengan standar response wrapper."
+  },
+  "servers": [
+    {
+      "url": "https://golearn2.azhari.my.id",
+      "description": "Development Server"
+    }
+  ],
+  "paths": {
+    "/api/v1/products": {
+      "post": {
+        "summary": "Create New Product",
+        "description": "Membuat data produk baru.",
+        "tags": [
+          "Product"
+        ],
+        "requestBody": {
+          "description": "Payload produk",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "price": { "type": "integer" },
+                  "description": { "type": "string" }
+                }
+              },
+              "example": {
+                "name": "Produk Satu",
+                "price": 2500,
+                "description": "Testing Product Satu2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "id": 3,
+                    "name": "Produk Satu",
+                    "description": "Testing Product Satu2",
+                    "price": 2500
+                  },
+                  "message": "Product created successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Product List",
+        "description": "Mengambil semua data produk.",
+        "tags": [
+          "Product"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Produk Satu",
+                      "description": "Deskripsi satu",
+                      "price": 2500
+                    },
+                    {
+                      "id": 2,
+                      "name": "Produk Dua",
+                      "description": "Deskripsi dua",
+                      "price": 5000
+                    }
+                  ],
+                  "message": "Products retrieved successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/1": {
+      "get": {
+        "summary": "Get Product Detail",
+        "description": "Mengambil detail satu produk.",
+        "tags": [
+          "Product"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "id": 1,
+                    "name": "Produk Satu",
+                    "description": "Testing Product Satu2",
+                    "price": 2500
+                  },
+                  "message": "Product detail retrieved successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Product",
+        "description": "Update data produk.",
+        "tags": [
+          "Product"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "price": { "type": "integer" },
+                  "description": { "type": "string" }
+                }
+              },
+              "example": {
+                "name": "Produk Dua Ubah",
+                "price": 3000,
+                "description": "Deskripsi Update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "id": 1,
+                    "name": "Produk Dua Ubah",
+                    "description": "Deskripsi Update",
+                    "price": 3000
+                  },
+                  "message": "Product updated successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Product",
+        "description": "Hapus data produk.",
+        "tags": [
+          "Product"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": null,
+                  "message": "Product deleted successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories": {
+      "post": {
+        "summary": "Create Category",
+        "description": "Buat kategori baru.",
+        "tags": [
+          "Category"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              },
+              "example": {
+                "name": "Kategori Baru",
+                "description": "Deskripsi Kategori"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "id": 5,
+                    "name": "Kategori Baru",
+                    "description": "Deskripsi Kategori"
+                  },
+                  "message": "Category created successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Category List",
+        "description": "Ambil semua kategori.",
+        "tags": [
+          "Category"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Elektronik",
+                      "description": "Barang elektronik"
+                    },
+                    {
+                      "id": 2,
+                      "name": "Pakaian",
+                      "description": "Baju dan celana"
+                    }
+                  ],
+                  "message": "Categories retrieved successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories/1": {
+      "get": {
+        "summary": "Get Category Detail",
+        "description": "Detail kategori.",
+        "tags": [
+          "Category"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "id": 1,
+                    "name": "Elektronik",
+                    "description": "Barang elektronik"
+                  },
+                  "message": "Category detail retrieved successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Category",
+        "description": "Update kategori.",
+        "tags": [
+          "Category"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              },
+              "example": {
+                "name": "Elektronik Murah",
+                "description": "Barang elektronik diskon"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "id": 1,
+                    "name": "Elektronik Murah",
+                    "description": "Barang elektronik diskon"
+                  },
+                  "message": "Category updated successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Category",
+        "description": "Hapus kategori.",
+        "tags": [
+          "Category"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": null,
+                  "message": "Category deleted successfully",
+                  "success": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
