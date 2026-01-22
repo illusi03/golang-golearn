@@ -9,26 +9,28 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/static"
 	"github.com/illusi03/golearn/module_category"
 	"github.com/illusi03/golearn/module_product"
+	"github.com/illusi03/golearn/template"
+	"github.com/illusi03/golearn/utils/middleware"
 )
 
 func main() {
+
 	app := fiber.New(fiber.Config{
 		AppName:      "API",
 		ServerHeader: "Fiber",
-		ErrorHandler: customErrorHandler,
+		// ErrorHandler: customErrorHandler,
 	})
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{"*"},
+	}))
 
 	// Health check endpoint
-	app.Get("/", func(c fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"success": true,
-			"message": "API is running",
-			"version": "1.0.0",
-		})
-	})
-
 	app.Get("/health", func(c fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"success": true,
@@ -58,6 +60,16 @@ func main() {
 	categorys.Get("/:id", categoryHandler.GetDetail)
 	categorys.Put("/:id", categoryHandler.Update)
 	categorys.Delete("/:id", categoryHandler.Delete)
+
+	// Static files middleware (must be last)
+	fsys := template.GetFileSystem("dist")
+	app.Use(middleware.TryFilesHTML(fsys))
+	app.Use(static.New("", static.Config{
+		FS:         fsys,
+		IndexNames: []string{"index.html"},
+		Browse:     false,
+		MaxAge:     5,
+	}))
 
 	// Graceful shutdown
 	c := make(chan os.Signal, 1)
