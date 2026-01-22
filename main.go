@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/illusi03/golearn/module_category"
 	"github.com/illusi03/golearn/module_product"
 )
 
@@ -40,7 +41,7 @@ func main() {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
-	// User routes
+	// Products routes
 	productHandler := module_product.NewProductHandler()
 	products := v1.Group("/products")
 	products.Post("/", productHandler.Create)
@@ -48,6 +49,15 @@ func main() {
 	products.Get("/:id", productHandler.GetDetail)
 	products.Put("/:id", productHandler.Update)
 	products.Delete("/:id", productHandler.Delete)
+
+	// Categories routes
+	categoryHandler := module_category.NewCategoryHandler()
+	categorys := v1.Group("/categories")
+	categorys.Post("/", categoryHandler.Create)
+	categorys.Get("/", categoryHandler.GetAll)
+	categorys.Get("/:id", categoryHandler.GetDetail)
+	categorys.Put("/:id", categoryHandler.Update)
+	categorys.Delete("/:id", categoryHandler.Delete)
 
 	// Graceful shutdown
 	c := make(chan os.Signal, 1)
