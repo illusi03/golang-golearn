@@ -22,7 +22,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		AppName:      "API",
 		ServerHeader: "Fiber",
-		// ErrorHandler: customErrorHandler,
+		ErrorHandler: customErrorHandler,
 	})
 
 	app.Use(cors.New(cors.Config{

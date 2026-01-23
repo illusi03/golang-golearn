@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Scalar API Reference</title>
+    <title>Golearn API Docs</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -21,6 +21,68 @@
         url: 'https://golearn2.azhari.my.id/openapi.json',
         // Avoid CORS issues
         proxyUrl: 'https://proxy.scalar.com',
+        telemetry: false,
+        "defaultOpenAllTags": true,
+        "expandAllModelSections": true,
+        "expandAllResponses": true,
+        "hideClientButton": true,
+        "showSidebar": true,
+        "showDeveloperTools": "localhost",
+        "showToolbar": "localhost",
+        "operationTitleSource": "summary",
+        "theme": "purple",
+        "persistAuth": false,
+        "telemetry": true,
+        "layout": "modern",
+        "isEditable": false,
+        "isLoading": false,
+        "hideModels": false,
+        "documentDownloadType": "both",
+        "hideTestRequestButton": false,
+        "hideSearch": false,
+        "showOperationId": false,
+        "hideDarkModeToggle": true,
+        "withDefaultFonts": true,
+        "defaultOpenAllTags": true,
+        "orderSchemaPropertiesBy": "alpha",
+        "orderRequiredPropertiesFirst": true,
+        "title": "API #1",
+        "slug": "api-1",
+        "darkMode": true,
+        "default": false,
+        customCss: `
+          /* 1) Sembunyikan link/branding yang mengarah ke Scalar */
+          #app a[href*="scalar.com" i],
+          #app a[href*="jsdelivr.net/npm/@scalar" i],
+          #app a[href*="github.com/scalar" i] {
+            display: none !important;
+          }
+
+          /* 2) Sembunyikan elemen yang biasanya jadi logo/brand (kalau pakai aria/title) */
+          #app [aria-label*="scalar" i],
+          #app [title*="scalar" i],
+          #app img[alt*="scalar" i],
+          #app svg[aria-label*="scalar" i] {
+            display: none !important;
+          }
+
+          /* 3) Tambahin brand kamu sendiri (overlay ringan) */
+          #app::before {
+            content: "My App";
+            position: fixed;
+            top: 14px;
+            left: 16px;
+            z-index: 999999;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: .2px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(0,0,0,.35);
+            backdrop-filter: blur(6px);
+            pointer-events: none;
+          }
+        `,
       })
     </script>
   </body>
