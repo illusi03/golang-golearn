@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://golearn2.azhari.my.id",
+      "url": "https://golearn.azhari.my.id",
       "description": "Development Server"
     }
   ],
