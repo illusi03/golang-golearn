@@ -1,4 +1,4 @@
-package module_category
+package model
 
 type CategoryModel struct {
 	ID          int    `json:"id"`

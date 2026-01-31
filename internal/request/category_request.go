@@ -1,4 +1,4 @@
-package module_category
+package request
 
 type CategoryRequest struct {
 	Name        string `json:"name"`
