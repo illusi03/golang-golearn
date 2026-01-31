@@ -21,9 +21,10 @@ func NewProductRepository(dbPool *pgxpool.Pool) *ProductRepository {
 
 func (a *ProductRepository) FindAll(ctx context.Context) ([]model.ProductModel, error) {
 	const query = `
-		SELECT id, name, description, price
-		FROM products
-		ORDER BY id
+		SELECT p.id, p.name, p.description, p.price, p.category_id, c.name as category_name
+		FROM products p
+		LEFT JOIN categories c ON p.category_id = c.id
+		ORDER BY p.id
 	`
 	rows, err := a.dbPool.Query(ctx, query)
 	if err != nil {
@@ -34,7 +35,7 @@ func (a *ProductRepository) FindAll(ctx context.Context) ([]model.ProductModel, 
 	list := make([]model.ProductModel, 0)
 	for rows.Next() {
 		var c model.ProductModel
-		if err := rows.Scan(&c.ID, &c.Name, &c.Description, &c.Price); err != nil {
+		if err := rows.Scan(&c.ID, &c.Name, &c.Description, &c.Price, &c.CategoryID, &c.CategoryName); err != nil {
 			return nil, err
 		}
 		list = append(list, c)
@@ -50,14 +51,15 @@ func (a *ProductRepository) FindOne(
 	id int,
 ) (*model.ProductModel, error) {
 	const query = `
-		SELECT id, name, description, price
-		FROM products
-		WHERE id = $1
+		SELECT p.id, p.name, p.description, p.price, p.category_id, c.name as category_name
+		FROM products p
+		LEFT JOIN categories c ON p.category_id = c.id
+		WHERE p.id = $1
 	`
 	var c model.ProductModel
 	err := a.dbPool.
 		QueryRow(ctx, query, id).
-		Scan(&c.ID, &c.Name, &c.Description, &c.Price)
+		Scan(&c.ID, &c.Name, &c.Description, &c.Price, &c.CategoryID, &c.CategoryName)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
