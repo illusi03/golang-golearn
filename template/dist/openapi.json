@@ -1,93 +1,61 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "GoLearn API",
+    "description": "API documentation for GoLearn application",
     "version": "1.0.0",
-    "description": "Dokumentasi API untuk aplikasi GoLearn dengan standar response wrapper."
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
   },
   "servers": [
     {
       "url": "https://golearn.azhari.my.id",
-      "description": "Development Server"
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Products",
+      "description": "Product management endpoints"
+    },
+    {
+      "name": "Categories",
+      "description": "Category management endpoints"
     }
   ],
   "paths": {
-    "/api/v1/products": {
-      "post": {
-        "summary": "Create New Product",
-        "description": "Membuat data produk baru.",
-        "tags": [
-          "Product"
-        ],
-        "requestBody": {
-          "description": "Payload produk",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "price": { "type": "integer" },
-                  "description": { "type": "string" }
-                }
-              },
-              "example": {
-                "name": "Produk Satu",
-                "price": 2500,
-                "description": "Testing Product Satu2"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "example": {
-                  "data": {
-                    "id": 3,
-                    "name": "Produk Satu",
-                    "description": "Testing Product Satu2",
-                    "price": 2500
-                  },
-                  "message": "Product created successfully",
-                  "success": true
-                }
-              }
-            }
-          }
-        }
-      },
+    "/health": {
       "get": {
-        "summary": "Get Product List",
-        "description": "Mengambil semua data produk.",
-        "tags": [
-          "Product"
-        ],
+        "tags": ["Health"],
+        "summary": "Health check",
+        "description": "Check if the API is running",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "API is healthy",
             "content": {
               "application/json": {
-                "example": {
-                  "data": [
-                    {
-                      "id": 1,
-                      "name": "Produk Satu",
-                      "description": "Deskripsi satu",
-                      "price": 2500
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
                     },
-                    {
-                      "id": 2,
-                      "name": "Produk Dua",
-                      "description": "Deskripsi dua",
-                      "price": 5000
+                    "message": {
+                      "type": "string",
+                      "example": "API is healthy"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "up"
                     }
-                  ],
-                  "message": "Products retrieved successfully",
-                  "success": true
+                  }
                 }
               }
             }
@@ -95,27 +63,106 @@
         }
       }
     },
-    "/api/v1/products/1": {
+    "/api/v1/products": {
       "get": {
-        "summary": "Get Product Detail",
-        "description": "Mengambil detail satu produk.",
-        "tags": [
-          "Product"
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "description": "Retrieve a list of all products",
+        "responses": {
+          "200": {
+            "description": "Products retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create a new product",
+        "description": "Create a new product with the provided details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "description": "Retrieve a single product by its ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Product ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Product retrieved successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "id": 1,
-                    "name": "Produk Satu",
-                    "description": "Testing Product Satu2",
-                    "price": 2500
-                  },
-                  "message": "Product detail retrieved successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Product not found or invalid ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -123,44 +170,48 @@
         }
       },
       "put": {
-        "summary": "Update Product",
-        "description": "Update data produk.",
-        "tags": [
-          "Product"
+        "tags": ["Products"],
+        "summary": "Update product",
+        "description": "Update an existing product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Product ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "price": { "type": "integer" },
-                  "description": { "type": "string" }
-                }
-              },
-              "example": {
-                "name": "Produk Dua Ubah",
-                "price": 3000,
-                "description": "Deskripsi Update"
+                "$ref": "#/components/schemas/ProductRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Product updated successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "id": 1,
-                    "name": "Produk Dua Ubah",
-                    "description": "Deskripsi Update",
-                    "price": 3000
-                  },
-                  "message": "Product updated successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Product not found or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -168,20 +219,38 @@
         }
       },
       "delete": {
-        "summary": "Delete Product",
-        "description": "Hapus data produk.",
-        "tags": [
-          "Product"
+        "tags": ["Products"],
+        "summary": "Delete product",
+        "description": "Delete a product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Product ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Product deleted successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": null,
-                  "message": "Product deleted successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Product not found or invalid ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -190,74 +259,64 @@
       }
     },
     "/api/v1/categories": {
-      "post": {
-        "summary": "Create Category",
-        "description": "Buat kategori baru.",
-        "tags": [
-          "Category"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string" }
-                }
-              },
-              "example": {
-                "name": "Kategori Baru",
-                "description": "Deskripsi Kategori"
-              }
-            }
-          }
-        },
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get all categories",
+        "description": "Retrieve a list of all categories",
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "Categories retrieved successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "id": 5,
-                    "name": "Kategori Baru",
-                    "description": "Deskripsi Kategori"
-                  },
-                  "message": "Category created successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           }
         }
       },
-      "get": {
-        "summary": "Get Category List",
-        "description": "Ambil semua kategori.",
-        "tags": [
-          "Category"
-        ],
+      "post": {
+        "tags": ["Categories"],
+        "summary": "Create a new category",
+        "description": "Create a new category with the provided details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Category created successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": [
-                    {
-                      "id": 1,
-                      "name": "Elektronik",
-                      "description": "Barang elektronik"
-                    },
-                    {
-                      "id": 2,
-                      "name": "Pakaian",
-                      "description": "Baju dan celana"
-                    }
-                  ],
-                  "message": "Categories retrieved successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -265,26 +324,40 @@
         }
       }
     },
-    "/api/v1/categories/1": {
+    "/api/v1/categories/{id}": {
       "get": {
-        "summary": "Get Category Detail",
-        "description": "Detail kategori.",
-        "tags": [
-          "Category"
+        "tags": ["Categories"],
+        "summary": "Get category by ID",
+        "description": "Retrieve a single category by its ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Category ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Category retrieved successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "id": 1,
-                    "name": "Elektronik",
-                    "description": "Barang elektronik"
-                  },
-                  "message": "Category detail retrieved successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Category not found or invalid ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -292,41 +365,48 @@
         }
       },
       "put": {
-        "summary": "Update Category",
-        "description": "Update kategori.",
-        "tags": [
-          "Category"
+        "tags": ["Categories"],
+        "summary": "Update category",
+        "description": "Update an existing category by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Category ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string" }
-                }
-              },
-              "example": {
-                "name": "Elektronik Murah",
-                "description": "Barang elektronik diskon"
+                "$ref": "#/components/schemas/CategoryRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Category updated successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "id": 1,
-                    "name": "Elektronik Murah",
-                    "description": "Barang elektronik diskon"
-                  },
-                  "message": "Category updated successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Category not found or validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -334,23 +414,233 @@
         }
       },
       "delete": {
-        "summary": "Delete Category",
-        "description": "Hapus kategori.",
-        "tags": [
-          "Category"
+        "tags": ["Categories"],
+        "summary": "Delete category",
+        "description": "Delete a category by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Category ID",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Category deleted successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "data": null,
-                  "message": "Category deleted successfully",
-                  "success": true
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Category not found or invalid ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Product Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product Description"
+          },
+          "price": {
+            "type": "integer",
+            "example": 10000
+          },
+          "category_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1
+          },
+          "category_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Category Name"
+          }
+        }
+      },
+      "ProductRequest": {
+        "type": "object",
+        "required": ["name", "price", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Product Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product Description"
+          },
+          "price": {
+            "type": "integer",
+            "example": 10000
+          },
+          "category_id": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "ProductResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Data fetched successfully"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Product"
+          }
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Data fetched successfully"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Category Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Category Description"
+          }
+        }
+      },
+      "CategoryRequest": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Category Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Category Description"
+          }
+        }
+      },
+      "CategoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Data fetched successfully"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Category"
+          }
+        }
+      },
+      "CategoryListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Data fetched successfully"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed successfully"
+          },
+          "data": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "Error message"
+          },
+          "error": {
+            "nullable": true,
+            "example": null
           }
         }
       }
