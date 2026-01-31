@@ -1,4 +1,4 @@
-package module_product
+package model
 
 type ProductModel struct {
 	ID          int    `json:"id"`
@@ -6,6 +6,3 @@ type ProductModel struct {
 	Description string `json:"description"`
 	Price       int    `json:"price"`
 }
-
-var LastProductId int = 0
-var ProductDatas []*ProductModel

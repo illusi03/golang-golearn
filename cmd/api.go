@@ -24,6 +24,8 @@ type ApiDeamon struct {
 	db                 *database.DB
 	categoryService    *service.CategoryService
 	categoryRepository *repository.CategoryRepository
+	productService     *service.ProductService
+	productRepository  *repository.ProductRepository
 }
 
 type ApiConfig struct {
@@ -60,10 +62,12 @@ func (a *ApiDeamon) registerDb() {
 
 func (a *ApiDeamon) registerRepository() {
 	a.categoryRepository = repository.NewCategoryRepository(a.db.Pool)
+	a.productRepository = repository.NewProductRepository(a.db.Pool)
 }
 
 func (a *ApiDeamon) registerService() {
 	a.categoryService = service.NewCategoryService(a.categoryRepository)
+	a.productService = service.NewProductService(a.productRepository)
 }
 
 func (a *ApiDeamon) registerHandler() {
@@ -96,13 +100,13 @@ func (a *ApiDeamon) registerHandler() {
 	v1 := api.Group("/v1")
 
 	// Products routes
-	// productHandler := module_product.NewProductHandler()
-	// products := v1.Group("/products")
-	// products.Post("/", productHandler.Create)
-	// products.Get("/", productHandler.GetAll)
-	// products.Get("/:id", productHandler.GetDetail)
-	// products.Put("/:id", productHandler.Update)
-	// products.Delete("/:id", productHandler.Delete)
+	productHandler := handler.NewProductHandler(a.productService)
+	products := v1.Group("/products")
+	products.Get("/", productHandler.GetAll)
+	products.Get("/:id", productHandler.GetDetail)
+	products.Post("/", productHandler.Create)
+	products.Put("/:id", productHandler.Update)
+	products.Delete("/:id", productHandler.Delete)
 
 	// Categories routes
 	categoryHandler := handler.NewCategoryHandler(a.categoryService)

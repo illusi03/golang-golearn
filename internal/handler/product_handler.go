@@ -1,20 +1,27 @@
-package module_product
+package handler
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/illusi03/golearn/internal/model"
+	"github.com/illusi03/golearn/internal/request"
+	"github.com/illusi03/golearn/internal/service"
 )
 
 type ProductHandler struct {
+	productService *service.ProductService
 }
 
-func NewProductHandler() *ProductHandler {
-	return &ProductHandler{}
+func NewProductHandler(productService *service.ProductService) *ProductHandler {
+	return &ProductHandler{
+		productService: productService,
+	}
 }
 
 func (h *ProductHandler) Create(c fiber.Ctx) error {
-	request := &ProductRequest{}
+	request := &request.ProductRequest{}
 	if err := c.Bind().Body(&request); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"success": false,
@@ -23,24 +30,24 @@ func (h *ProductHandler) Create(c fiber.Ctx) error {
 		})
 	}
 
-	LastProductId = LastProductId + 1
-	newData := &ProductModel{
-		ID:          LastProductId,
+	data, err := h.productService.Create(c, &model.ProductModel{
 		Name:        request.Name,
-		Price:       request.Price,
 		Description: request.Description,
+		Price:       request.Price,
+	})
+	if err != nil {
+		return fmt.Errorf("Terdapat error : %w", err)
 	}
-	ProductDatas = append(ProductDatas, newData)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Data created successfully",
-		"data":    newData,
+		"data":    data,
 	})
 }
 
 func (h *ProductHandler) Update(c fiber.Ctx) error {
-	request := &ProductRequest{}
+	request := &request.ProductRequest{}
 	if err := c.Bind().Body(&request); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"success": false,
@@ -59,28 +66,28 @@ func (h *ProductHandler) Update(c fiber.Ctx) error {
 		})
 	}
 
-	var productModel *ProductModel
-	for i, v := range ProductDatas {
-		if v.ID == id {
-			ProductDatas[i].Name = request.Name
-			ProductDatas[i].Price = request.Price
-			ProductDatas[i].Description = request.Description
-			productModel = v
-		}
+	data, err := h.productService.Update(c, &model.ProductModel{
+		ID:          id,
+		Name:        request.Name,
+		Description: request.Description,
+		Price:       request.Price,
+	})
+	if err != nil {
+		return fmt.Errorf("Terdapat error : %w", err)
 	}
 
-	if productModel == nil {
+	if !data {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Product not found",
-			"error":   productModel,
+			"error":   data,
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Data updated successfully",
-		"data":    productModel,
+		"data":    data,
 	})
 }
 
@@ -95,35 +102,36 @@ func (h *ProductHandler) Delete(c fiber.Ctx) error {
 		})
 	}
 
-	var productModel *ProductModel
-	for i, v := range ProductDatas {
-		if ProductDatas[i].ID == id {
-			ProductDatas = append(ProductDatas[:i], ProductDatas[i+1:]...)
-			productModel = v
-			break
-		}
+	data, err := h.productService.Delete(c, id)
+	if err != nil {
+		return fmt.Errorf("Terdapat error : %w", err)
 	}
 
-	if productModel == nil {
+	if !data {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Product not found",
-			"error":   productModel,
+			"error":   data,
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Data deleted successfully",
-		"data":    productModel,
+		"data":    data,
 	})
 }
 
 func (h *ProductHandler) GetAll(c fiber.Ctx) error {
+	list, err := h.productService.FindAll(c)
+	if err != nil {
+		return fmt.Errorf("Terdapat error : %w", err)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Data fetched successfully",
-		"data":    ProductDatas,
+		"data":    list,
 	})
 }
 
@@ -138,24 +146,22 @@ func (h *ProductHandler) GetDetail(c fiber.Ctx) error {
 		})
 	}
 
-	var productModel *ProductModel
-	for _, v := range ProductDatas {
-		if v.ID == id {
-			productModel = v
-		}
+	data, err := h.productService.FindOne(c, id)
+	if err != nil {
+		return fmt.Errorf("Terdapat error: %w", err)
 	}
 
-	if productModel == nil {
+	if data == nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Product not found",
-			"error":   productModel,
+			"error":   data,
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Data fetched successfully",
-		"data":    productModel,
+		"data":    data,
 	})
 }

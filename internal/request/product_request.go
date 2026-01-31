@@ -1,4 +1,4 @@
-package module_product
+package request
 
 type ProductRequest struct {
 	Name        string `json:"name"`
