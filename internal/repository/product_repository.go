@@ -93,8 +93,8 @@ func (a *ProductRepository) Update(
 ) (bool, error) {
 	const query = `
 		UPDATE products
-		SET name = $1, description = $2, price = $3
-		WHERE id = $4
+		SET name = $1, description = $2, price = $3, category_id = $4
+		WHERE id = $5
 	`
 	cmdTag, err := a.dbPool.Exec(
 		ctx,
@@ -102,6 +102,7 @@ func (a *ProductRepository) Update(
 		c.Name,
 		c.Description,
 		c.Price,
+		c.CategoryID,
 		c.ID,
 	)
 	if err != nil {
@@ -118,9 +119,9 @@ func (a *ProductRepository) Create(
 	c *model.ProductModel,
 ) (*model.ProductModel, error) {
 	const query = `
-		INSERT INTO products (name, description, price)
-		VALUES ($1, $2, $3)
-		RETURNING id, name, description, price
+		INSERT INTO products (name, description, price, category_id)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, name, description, price, category_id
 	`
 	var out model.ProductModel
 	err := a.dbPool.QueryRow(
@@ -129,7 +130,8 @@ func (a *ProductRepository) Create(
 		c.Name,
 		c.Description,
 		c.Price,
-	).Scan(&out.ID, &out.Name, &out.Description, &out.Price)
+		c.CategoryID,
+	).Scan(&out.ID, &out.Name, &out.Description, &out.Price, &out.CategoryID)
 	if err != nil {
 		return nil, err
 	}

@@ -30,11 +30,16 @@ func (h *ProductHandler) Create(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.productService.Create(c, &model.ProductModel{
+	productModel := &model.ProductModel{
 		Name:        request.Name,
 		Description: request.Description,
 		Price:       request.Price,
-	})
+	}
+	if request.CategoryId > 0 {
+		productModel.CategoryID = &request.CategoryId
+	}
+
+	data, err := h.productService.Create(c, productModel)
 	if err != nil {
 		return fmt.Errorf("Terdapat error : %w", err)
 	}
@@ -66,12 +71,17 @@ func (h *ProductHandler) Update(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.productService.Update(c, &model.ProductModel{
+	productModel := &model.ProductModel{
 		ID:          id,
 		Name:        request.Name,
 		Description: request.Description,
 		Price:       request.Price,
-	})
+	}
+	if request.CategoryId > 0 {
+		productModel.CategoryID = &request.CategoryId
+	}
+
+	data, err := h.productService.Update(c, productModel)
 	if err != nil {
 		return fmt.Errorf("Terdapat error : %w", err)
 	}
