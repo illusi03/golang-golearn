@@ -541,7 +541,7 @@
         }
       }
     },
-    "/api/v1/report/hari-ini": {
+    "/api/report/hari-ini": {
       "get": {
         "tags": ["Report"],
         "summary": "Get today's report",
@@ -570,7 +570,7 @@
         }
       }
     },
-    "/api/v1/report": {
+    "/api/report": {
       "get": {
         "tags": ["Report"],
         "summary": "Get report by date range",
