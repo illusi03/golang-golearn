@@ -21,12 +21,16 @@ import (
 )
 
 type ApiDeamon struct {
-	config             *ApiConfig
-	db                 *database.DB
-	categoryService    *service.CategoryService
-	categoryRepository *repository.CategoryRepository
-	productService     *service.ProductService
-	productRepository  *repository.ProductRepository
+	config                *ApiConfig
+	db                    *database.DB
+	categoryService       *service.CategoryService
+	categoryRepository    *repository.CategoryRepository
+	productService        *service.ProductService
+	productRepository     *repository.ProductRepository
+	transactionService    *service.TransactionService
+	transactionRepository *repository.TransactionRepository
+	reportService         *service.ReportService
+	reportRepository      *repository.ReportRepository
 }
 
 type ApiConfig struct {
@@ -64,11 +68,15 @@ func (a *ApiDeamon) registerDb() {
 func (a *ApiDeamon) registerRepository() {
 	a.categoryRepository = repository.NewCategoryRepository(a.db.Pool)
 	a.productRepository = repository.NewProductRepository(a.db.Pool)
+	a.transactionRepository = repository.NewTransactionRepository(a.db.Pool)
+	a.reportRepository = repository.NewReportRepository(a.db.Pool)
 }
 
 func (a *ApiDeamon) registerService() {
 	a.categoryService = service.NewCategoryService(a.categoryRepository)
 	a.productService = service.NewProductService(a.productRepository)
+	a.transactionService = service.NewTransactionService(a.transactionRepository, a.productRepository)
+	a.reportService = service.NewReportService(a.reportRepository)
 }
 
 func (a *ApiDeamon) registerHandler() {
@@ -117,6 +125,18 @@ func (a *ApiDeamon) registerHandler() {
 	categories.Post("/", categoryHandler.Create)
 	categories.Put("/:id", categoryHandler.Update)
 	categories.Delete("/:id", categoryHandler.Delete)
+
+	// Checkout/Transactions routes
+	checkoutHandler := handler.NewCheckoutHandler(a.transactionService)
+	transactions := v1.Group("/transactions")
+	transactions.Get("/", checkoutHandler.GetAllTransactions)
+	transactions.Post("/checkout", checkoutHandler.Checkout)
+
+	// Report routes
+	reportHandler := handler.NewReportHandler(a.reportService)
+	report := api.Group("/report")
+	report.Get("/hari-ini", reportHandler.GetTodayReport)
+	report.Get("/", reportHandler.GetReport)
 
 	fsys := template.GetFileSystem("dist")
 	app.Use(middleware.TryFilesHTML(fsys))

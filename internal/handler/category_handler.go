@@ -30,12 +30,12 @@ func (h *CategoryHandler) Create(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.categoryService.Create(c, &model.CategoryModel{
+	data, err := h.categoryService.Create(c.Context(), &model.CategoryModel{
 		Name:        request.Name,
 		Description: request.Description,
 	})
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -65,13 +65,13 @@ func (h *CategoryHandler) Update(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.categoryService.Update(c, &model.CategoryModel{
+	data, err := h.categoryService.Update(c.Context(), &model.CategoryModel{
 		ID:          id,
 		Name:        request.Name,
 		Description: request.Description,
 	})
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	if !data {
@@ -100,9 +100,9 @@ func (h *CategoryHandler) Delete(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.categoryService.Delete(c, id)
+	data, err := h.categoryService.Delete(c.Context(), id)
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	if !data {
@@ -123,7 +123,7 @@ func (h *CategoryHandler) Delete(c fiber.Ctx) error {
 func (h *CategoryHandler) GetAll(c fiber.Ctx) error {
 	list, err := h.categoryService.FindAll(c)
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -144,9 +144,9 @@ func (h *CategoryHandler) GetDetail(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.categoryService.FindOne(c, id)
+	data, err := h.categoryService.FindOne(c.Context(), id)
 	if err != nil {
-		return fmt.Errorf("Terdapat error: %w", err)
+		return fmt.Errorf("Error Occured: %w", err)
 	}
 
 	if data == nil {

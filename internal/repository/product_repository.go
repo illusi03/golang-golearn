@@ -19,14 +19,22 @@ func NewProductRepository(dbPool *pgxpool.Pool) *ProductRepository {
 	}
 }
 
-func (a *ProductRepository) FindAll(ctx context.Context) ([]model.ProductModel, error) {
-	const query = `
-		SELECT p.id, p.name, p.description, p.price, p.category_id, c.name as category_name
+func (a *ProductRepository) FindAll(ctx context.Context, name string) ([]model.ProductModel, error) {
+	query := `
+		SELECT p.id, p.name, p.description, p.price, p.stock, p.category_id, c.name as category_name
 		FROM products p
 		LEFT JOIN categories c ON p.category_id = c.id
-		ORDER BY p.id
 	`
-	rows, err := a.dbPool.Query(ctx, query)
+	args := []any{}
+
+	if name != "" {
+		query += " WHERE p.name ILIKE $1"
+		args = append(args, "%"+name+"%")
+	}
+
+	query += " ORDER BY p.id"
+
+	rows, err := a.dbPool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +43,7 @@ func (a *ProductRepository) FindAll(ctx context.Context) ([]model.ProductModel, 
 	list := make([]model.ProductModel, 0)
 	for rows.Next() {
 		var c model.ProductModel
-		if err := rows.Scan(&c.ID, &c.Name, &c.Description, &c.Price, &c.CategoryID, &c.CategoryName); err != nil {
+		if err := rows.Scan(&c.ID, &c.Name, &c.Description, &c.Price, &c.Stock, &c.CategoryID, &c.CategoryName); err != nil {
 			return nil, err
 		}
 		list = append(list, c)
@@ -51,7 +59,7 @@ func (a *ProductRepository) FindOne(
 	id int,
 ) (*model.ProductModel, error) {
 	const query = `
-		SELECT p.id, p.name, p.description, p.price, p.category_id, c.name as category_name
+		SELECT p.id, p.name, p.description, p.price, p.stock, p.category_id, c.name as category_name
 		FROM products p
 		LEFT JOIN categories c ON p.category_id = c.id
 		WHERE p.id = $1
@@ -59,7 +67,7 @@ func (a *ProductRepository) FindOne(
 	var c model.ProductModel
 	err := a.dbPool.
 		QueryRow(ctx, query, id).
-		Scan(&c.ID, &c.Name, &c.Description, &c.Price, &c.CategoryID, &c.CategoryName)
+		Scan(&c.ID, &c.Name, &c.Description, &c.Price, &c.Stock, &c.CategoryID, &c.CategoryName)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -93,8 +101,8 @@ func (a *ProductRepository) Update(
 ) (bool, error) {
 	const query = `
 		UPDATE products
-		SET name = $1, description = $2, price = $3, category_id = $4
-		WHERE id = $5
+		SET name = $1, description = $2, price = $3, stock = $4, category_id = $5
+		WHERE id = $6
 	`
 	cmdTag, err := a.dbPool.Exec(
 		ctx,
@@ -102,6 +110,7 @@ func (a *ProductRepository) Update(
 		c.Name,
 		c.Description,
 		c.Price,
+		c.Stock,
 		c.CategoryID,
 		c.ID,
 	)
@@ -119,9 +128,9 @@ func (a *ProductRepository) Create(
 	c *model.ProductModel,
 ) (*model.ProductModel, error) {
 	const query = `
-		INSERT INTO products (name, description, price, category_id)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id, name, description, price, category_id
+		INSERT INTO products (name, description, price, stock, category_id)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, name, description, price, stock, category_id
 	`
 	var out model.ProductModel
 	err := a.dbPool.QueryRow(
@@ -130,8 +139,9 @@ func (a *ProductRepository) Create(
 		c.Name,
 		c.Description,
 		c.Price,
+		c.Stock,
 		c.CategoryID,
-	).Scan(&out.ID, &out.Name, &out.Description, &out.Price, &out.CategoryID)
+	).Scan(&out.ID, &out.Name, &out.Description, &out.Price, &out.Stock, &out.CategoryID)
 	if err != nil {
 		return nil, err
 	}

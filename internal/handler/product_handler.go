@@ -34,14 +34,15 @@ func (h *ProductHandler) Create(c fiber.Ctx) error {
 		Name:        request.Name,
 		Description: request.Description,
 		Price:       request.Price,
+		Stock:       request.Stock,
 	}
 	if request.CategoryId > 0 {
 		productModel.CategoryID = &request.CategoryId
 	}
 
-	data, err := h.productService.Create(c, productModel)
+	data, err := h.productService.Create(c.Context(), productModel)
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -76,14 +77,15 @@ func (h *ProductHandler) Update(c fiber.Ctx) error {
 		Name:        request.Name,
 		Description: request.Description,
 		Price:       request.Price,
+		Stock:       request.Stock,
 	}
 	if request.CategoryId > 0 {
 		productModel.CategoryID = &request.CategoryId
 	}
 
-	data, err := h.productService.Update(c, productModel)
+	data, err := h.productService.Update(c.Context(), productModel)
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	if !data {
@@ -112,9 +114,9 @@ func (h *ProductHandler) Delete(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.productService.Delete(c, id)
+	data, err := h.productService.Delete(c.Context(), id)
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	if !data {
@@ -133,9 +135,10 @@ func (h *ProductHandler) Delete(c fiber.Ctx) error {
 }
 
 func (h *ProductHandler) GetAll(c fiber.Ctx) error {
-	list, err := h.productService.FindAll(c)
+	name := c.Query("name")
+	list, err := h.productService.FindAll(c.Context(), name)
 	if err != nil {
-		return fmt.Errorf("Terdapat error : %w", err)
+		return fmt.Errorf("Error Occured : %w", err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -156,9 +159,9 @@ func (h *ProductHandler) GetDetail(c fiber.Ctx) error {
 		})
 	}
 
-	data, err := h.productService.FindOne(c, id)
+	data, err := h.productService.FindOne(c.Context(), id)
 	if err != nil {
-		return fmt.Errorf("Terdapat error: %w", err)
+		return fmt.Errorf("Error Occured: %w", err)
 	}
 
 	if data == nil {

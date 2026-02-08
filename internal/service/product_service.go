@@ -17,8 +17,8 @@ func NewProductService(productRepository *repository.ProductRepository) *Product
 	}
 }
 
-func (a *ProductService) FindAll(ctx context.Context) ([]model.ProductModel, error) {
-	return a.productRepository.FindAll(ctx)
+func (a *ProductService) FindAll(ctx context.Context, name string) ([]model.ProductModel, error) {
+	return a.productRepository.FindAll(ctx, name)
 }
 
 func (a *ProductService) FindOne(ctx context.Context, id int) (*model.ProductModel, error) {
