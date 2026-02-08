@@ -27,6 +27,14 @@
     {
       "name": "Categories",
       "description": "Category management endpoints"
+    },
+    {
+      "name": "Transactions",
+      "description": "Checkout and transaction endpoints"
+    },
+    {
+      "name": "Report",
+      "description": "Sales report endpoints"
     }
   ],
   "paths": {
@@ -67,7 +75,19 @@
       "get": {
         "tags": ["Products"],
         "summary": "Get all products",
-        "description": "Retrieve a list of all products",
+        "description": "Retrieve a list of all products. Optionally filter by name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filter products by name (case-insensitive, partial match)",
+            "schema": {
+              "type": "string",
+              "example": "laptop"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Products retrieved successfully",
@@ -452,6 +472,156 @@
           }
         }
       }
+    },
+    "/api/v1/checkout": {
+      "post": {
+        "tags": ["Transactions"],
+        "summary": "Checkout",
+        "description": "Create a new transaction from cart items. Validates product existence, stock availability, and deducts stock atomically.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (product not found, insufficient stock, duplicate product)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions": {
+      "get": {
+        "tags": ["Transactions"],
+        "summary": "Get all transactions",
+        "description": "Retrieve a list of all transactions with their details",
+        "responses": {
+          "200": {
+            "description": "Transactions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/report/hari-ini": {
+      "get": {
+        "tags": ["Report"],
+        "summary": "Get today's report",
+        "description": "Retrieve sales report for today including total revenue, transaction count, and best selling product",
+        "responses": {
+          "200": {
+            "description": "Report retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/report": {
+      "get": {
+        "tags": ["Report"],
+        "summary": "Get report by date range",
+        "description": "Retrieve sales report for a specific date range",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-01-01"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2026-02-01"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -475,6 +645,10 @@
             "type": "integer",
             "example": 10000
           },
+          "stock": {
+            "type": "integer",
+            "example": 50
+          },
           "category_id": {
             "type": "integer",
             "nullable": true,
@@ -489,7 +663,7 @@
       },
       "ProductRequest": {
         "type": "object",
-        "required": ["name", "price", "description"],
+        "required": ["name", "price", "description", "stock"],
         "properties": {
           "name": {
             "type": "string",
@@ -502,6 +676,10 @@
           "price": {
             "type": "integer",
             "example": 10000
+          },
+          "stock": {
+            "type": "integer",
+            "example": 50
           },
           "category_id": {
             "type": "integer",
@@ -641,6 +819,168 @@
           "error": {
             "nullable": true,
             "example": null
+          }
+        }
+      },
+      "CheckoutItem": {
+        "type": "object",
+        "required": ["product_id", "quantity"],
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 2
+          }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutItem"
+            }
+          }
+        }
+      },
+      "TransactionDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "transaction_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "product_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "product_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Indomie Goreng"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 2
+          },
+          "subtotal": {
+            "type": "integer",
+            "example": 6000
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "total_amount": {
+            "type": "integer",
+            "example": 45000
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-02-08T10:30:00Z"
+          },
+          "details": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/TransactionDetail"
+            }
+          }
+        }
+      },
+      "TransactionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Checkout successful"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Transaction"
+          }
+        }
+      },
+      "TransactionListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Data fetched successfully"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        }
+      },
+      "BestSeller": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Indomie Goreng"
+          },
+          "quantity_sold": {
+            "type": "integer",
+            "example": 12
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "properties": {
+          "total_revenue": {
+            "type": "integer",
+            "example": 45000
+          },
+          "total_transactions": {
+            "type": "integer",
+            "example": 5
+          },
+          "best_seller": {
+            "$ref": "#/components/schemas/BestSeller"
+          }
+        }
+      },
+      "ReportResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Report fetched successfully"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Report"
           }
         }
       }
